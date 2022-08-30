@@ -1,0 +1,93 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: homer
+  namespace: {{ index . "namespace" }}
+spec:
+  serviceAccountName: {{ index . "serviceAccountName" }}
+  releaseName: homer
+  chart:
+    spec:
+      chart: homer
+      version: "8.0.2"
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home
+  interval: 30m
+  install:
+    remediation:
+      retries: 3
+  test:
+    enable: false
+  values:
+    ingress:
+      main:
+        enabled: true
+        annotations:
+          kubernetes.io/ingress.class: nginx
+        hosts:
+          - host: homer.{{ index . "domain"}}
+            paths:
+              - path: "/"
+                pathType: Prefix
+        tls:
+          - secretName: homer-cert
+            hosts:
+              - homer.{{ index . "domain"}}
+    configmap:
+      config:
+        enabled: true
+        # -- Homer configuration
+        # https://github.com/bastienwirtz/homer/blob/main/docs/configuration.md
+        data:
+          config.yml: |
+            title: {{ default "Applications dashboard" (index . "title") }}
+            subtitle: {{ default "Homer x Lizz" (index . "subtitle") }}
+            logo: {{ default "logo.png" (index . "logo") }}
+            header: true
+            footer: '<p>Created with <span class="has-text-danger">❤️</span> with <a href="https://bulma.io/">bulma</a>, <a href="https://vuejs.org/">vuejs</a> & <a href="https://fontawesome.com/">font awesome</a> // Fork me on <a href="https://github.com/bastienwirtz/homer"><i class="fab fa-github-alt"></i></a></p>' # set false if you want to hide it.
+            links: []
+            services:
+              - name: "Applications"
+                icon: "fas fa-cloud"
+                {{- if or (index . "isNextcloudInstalled") (index . "isPhotoprismInstalled") (index . "isVaultwardenInstalled") }}
+                items:
+                {{- else }}
+                items: []
+                {{- end }}
+                  {{- if index . "isNextcloudInstalled" }}
+                  - name: "Nextcloud"
+                    logo: "https://nextcloud.com/wp-content/uploads/2022/01/Nextcloud-Hub.png"
+                    subtitle: "Self-hosted productivity platform"
+                    tag: "app"
+                    {{- if and (index . "isNginxInstalled") (index . "isCertManagerInstalled") }}
+                    url: https://nextcloud.{{ index . "domain"}}
+                    {{- else }}
+                    url: http://nextcloud.{{ index . "domain"}}
+                    {{- end }}
+                    target: "_blank" 
+                  {{ end }}
+                  {{- if index . "isPhotoprismInstalled" }}
+                  - name: "Photoprism"
+                    logo: "https://photoprism.app/static/icons/logo.svg"
+                    subtitle: "Browse Your Life in Pictures"
+                    tag: "app"
+                    {{- if and (index . "isNginxInstalled") (index . "isCertManagerInstalled") }}
+                    url: https://photoprism.{{ index . "domain"}}
+                    {{- else }}
+                    url: http://photoprism.{{ index . "domain"}}
+                    {{- end }}
+                    target: "_blank" 
+                  {{ end }}
+                  {{- if index . "isVaultwardenInstalled" }}
+                  - name: "Vaultwarden"
+                    logo: "https://bitwarden.com/icons/icon-512x512.png"
+                    subtitle: "Open source password management solution"
+                    tag: "app"
+                    {{- if and (index . "isNginxInstalled") (index . "isCertManagerInstalled") }}
+                    url: https://vaultwarden.{{ index . "domain"}}
+                    {{- else }}
+                    url: http://vaultwarden.{{ index . "domain"}}
+                    {{- end }}
+                    target: "_blank" 
+                  {{ end }}
