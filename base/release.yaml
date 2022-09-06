@@ -22,6 +22,7 @@ spec:
   values:
     ingress:
       main:
+        {{- if and (index . "isNginxInstalled") (index . "isDomainInstalled") }}
         enabled: true
         annotations:
           kubernetes.io/ingress.class: nginx
@@ -30,10 +31,15 @@ spec:
             paths:
               - path: "/"
                 pathType: Prefix
+        {{- else }}
+        enable: false
+        {{- end }}
+        {{- if and (index . "isNginxInstalled") (index . "isDomainInstalled") (index . "isCertManagerInstalled") }}
         tls:
           - secretName: homer-cert
             hosts:
               - homer.{{ index . "domain"}}
+        {{- end }}
     configmap:
       config:
         enabled: true
