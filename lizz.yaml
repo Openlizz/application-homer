@@ -41,8 +41,6 @@ values:
     - name: title
     - name: subtitle
     - name: logo
-dependencies:
-  - {{ index . "isDomainInstalled" }}
 dependsOn:
   {{- if index . "isNginxInstalled" }}
   - name: {{index . "nginxName"}}
