@@ -13,6 +13,8 @@ values:
       repository: github.com/openlizz/application-photoprism
     - name: isVaultwardenInstalled
       repository: github.com/openlizz/application-vaultwarden
+    - name: isHomeAssistantInstalled
+      repository: github.com/openlizz/application-home-assistant
     - name: isDomainInstalled
       repository: github.com/openlizz/application-domain-name
   clusterValues:

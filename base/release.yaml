@@ -97,3 +97,15 @@ spec:
                     {{- end }}
                     target: "_blank" 
                   {{ end }}
+                  {{- if index . "isHomeAssistantInstalled" }}
+                  - name: "Home assistant"
+                    logo: "https://design.home-assistant.io/images/logo-variants.png"
+                    subtitle: "Home automation software"
+                    tag: "app"
+                    {{- if and (index . "isNginxInstalled") (index . "isCertManagerInstalled") }}
+                    url: https://home-assistant.{{ index . "domain"}}
+                    {{- else }}
+                    url: http://home-assistant.{{ index . "domain"}}
+                    {{- end }}
+                    target: "_blank" 
+                  {{ end }}
